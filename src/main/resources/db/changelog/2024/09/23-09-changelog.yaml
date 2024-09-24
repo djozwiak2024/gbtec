@@ -1,0 +1,32 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1727136694121-1
+      author: info
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_email
+                  name: id
+                  type: binary(16)
+              - column:
+                  name: from
+                  type: VARCHAR(255)
+              - column:
+                  name: to
+                  type: VARCHAR(255)
+              - column:
+                  name: subject
+                  type: VARCHAR(255)
+              - column:
+                  name: body
+                  type: VARCHAR(255)
+              - column:
+                  name: state
+                  type: SMALLINT
+            tableName: email
+

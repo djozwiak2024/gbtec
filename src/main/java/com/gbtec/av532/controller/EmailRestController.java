@@ -55,4 +55,10 @@ public class EmailRestController {
         return ResponseEntity.ok().build();
     }
 
+    @PutMapping("/send/{id}")
+    public ResponseEntity<EmailModel> sendEmail(@PathVariable UUID id) {
+        emailService.sendEmail(id);
+        return ResponseEntity.ok().build();
+    }
+
 }

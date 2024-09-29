@@ -10,12 +10,19 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * EmailRestController implements CRUD functionalities
+ * It allows to create, read, update and delete Emails.
+ * Furthermore, it allows to bulk create, read and delete Emails.
+ */
 @RestController
 @RequestMapping("emails")
 public class EmailRestController {
 
+    //EmailService as layer between Controller and Repositories and to run logic
     private final EmailService emailService;
 
+    //Inject Service
     public EmailRestController(EmailService emailService) {
         this.emailService = emailService;
     }
@@ -37,6 +44,16 @@ public class EmailRestController {
     @PostMapping("/create")
     public ResponseEntity<EmailModel> createEmail(@RequestBody EmailModel email) {
         return ResponseEntity.ok(emailService.createNewEmail(email));
+    }
+
+    @PostMapping("/createMultiple")
+    public ResponseEntity<EmailModel> createMultipleEmail(@RequestBody List<EmailModel> emails) {
+        try{
+            emails.forEach(emailService::createNewEmail);
+        }catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+        return ResponseEntity.ok().build();
     }
 
     @PutMapping("/update")

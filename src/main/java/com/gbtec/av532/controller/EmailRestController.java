@@ -1,5 +1,6 @@
 package com.gbtec.av532.controller;
 
+import com.gbtec.av532.exceptions.EmailNotADraftException;
 import com.gbtec.av532.exceptions.EmailNotFoundException;
 import com.gbtec.av532.model.EmailModel;
 import com.gbtec.av532.services.EmailService;
@@ -33,14 +34,18 @@ public class EmailRestController {
         return ResponseEntity.ok(emailService.getAllEmails());
     }
 
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<EmailModel> createEmail(@RequestBody EmailModel email) {
         return ResponseEntity.ok(emailService.createNewEmail(email));
     }
 
     @PutMapping("/update")
     public ResponseEntity<EmailModel> udpateEmail(@RequestBody EmailModel email) {
-        return ResponseEntity.ok(emailService.updateEmail(email));
+        try {
+            return ResponseEntity.ok(emailService.updateEmail(email));
+        } catch (EmailNotADraftException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @DeleteMapping("/{id}")

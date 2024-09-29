@@ -5,6 +5,8 @@ import com.gbtec.av532.exceptions.EmailNotFoundException;
 import com.gbtec.av532.model.EmailModel;
 import com.gbtec.av532.model.EmailState;
 import com.gbtec.av532.repositories.EmailRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.util.Streamable;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +17,9 @@ import java.util.UUID;
 @Service
 public class EmailService {
 
+    private static final Logger log = LoggerFactory.getLogger(EmailService.class);
     private final EmailRepository emailRepository;
+
 
     public EmailService(EmailRepository emailRepository) {
         this.emailRepository = emailRepository;
@@ -32,24 +36,36 @@ public class EmailService {
     public EmailModel createNewEmail(EmailModel email) {
         email.setState(EmailState.DRAFT);
         email.setLastChangeDateTime(LocalDateTime.now());
-        return emailRepository.save(email);
+        EmailModel saved = emailRepository.save(email);
+        log.info("New email created: {}", saved.getEmailId());
+        return saved;
     }
 
     public EmailModel updateEmail(EmailModel email) throws EmailNotADraftException {
         if(EmailState.DRAFT.equals(email.getState())) {
             email.setLastChangeDateTime(LocalDateTime.now());
-            return emailRepository.save(email);
+            EmailModel updated = emailRepository.save(email);
+            log.info("Email updated successfully: {}", updated.getEmailId());
+            return updated;
         } else {
+            log.error("Email {} not a draft", email.getEmailId());
             throw new EmailNotADraftException("Email is not in Draft State");
         }
     }
 
-    public EmailModel markAsSpam(){
-        emailRepository.findAllByState(EmailState)
+    public void markAsSpam(String spamMail){
+        Iterable<EmailModel> potentialSpamMails = emailRepository.findAllByEmailFromContainingIgnoreCaseOrEmailToContainingIgnoreCaseOrEmailBCCContainingIgnoreCaseOrEmailCCContainingIgnoreCase(spamMail, spamMail, spamMail, spamMail);
+        potentialSpamMails.forEach(email -> {
+            email.setLastChangeDateTime(LocalDateTime.now());
+            email.setState(EmailState.SPAM);
+            emailRepository.save(email);
+            log.info("Email successfully marked as spam: {}", email.getEmailId());
+        });
     }
 
     public void deleteEmail(UUID id) {
         emailRepository.deleteById(id);
+        log.info("Email deleted: {}", id);
     }
 
     public void deleteAllEmails() {
@@ -60,8 +76,10 @@ public class EmailService {
         emailRepository.findById(id).ifPresent(email -> {
             if(EmailState.DRAFT.equals(email.getState())){
                 email.setState(EmailState.SENT);
+                email.setLastChangeDateTime(LocalDateTime.now());
             }
             emailRepository.save(email);
+            log.info("Email sent successfully: {}", email.getEmailId());
         });
     }
 }

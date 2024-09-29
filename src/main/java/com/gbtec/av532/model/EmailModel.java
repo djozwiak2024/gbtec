@@ -3,7 +3,6 @@ package com.gbtec.av532.model;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,8 +27,6 @@ public class EmailModel {
     private EmailState state;
 
     private LocalDateTime lastChangeDateTime;
-
-    private boolean markedAsDeleted;
 
     public EmailModel(){
     }
